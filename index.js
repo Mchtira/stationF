@@ -1,13 +1,10 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const util = require('util')
-const path = require('path')
-const fs = require('fs')
 const fn = require('./function.js')
+const db = require('./db/mongo/mongo.js')
 const port = process.env.PORT || 4000
 
-const readFile = util.promisify(fs.readFile)
 const app = express()
 
 app.use(cors())
@@ -17,18 +14,27 @@ app.use(bodyParser.json())
 app.get('/', (req, res) => res.json('Hello World !'))
 
 app.get('/rooms', async (req, res) => {
-  const data = await readFile(path.join(__dirname, '/db/fs/rooms.json'), 'utf8')
-  let rooms = JSON.parse(data).rooms
+  const rooms = await db.getAllRooms()
   res.json(rooms)
 })
 
 app.post('/rooms', async (req, res) => {
   const equipements = req.body.equipements
   const capacity = req.body.capacity
-  const data = await readFile(path.join(__dirname, '/db/fs/rooms.json'), 'utf8')
-  let rooms = JSON.parse(data).rooms
+  let rooms = await db.getAllRooms()
   if (equipements) rooms = fn.filterByEquipements(rooms, equipements)
   if (capacity) rooms = fn.filterByCapacity(rooms, capacity)
+  res.json(rooms)
+})
+
+app.post('/availableRooms', async (req, res) => {
+  const date = req.body
+  let rooms = await db.getAllRooms()
+  res.json(rooms)
+})
+
+app.post('/reserveRoom', async (req, res) => {
+  let rooms = await db.getAllRooms()
   res.json(rooms)
 })
 
