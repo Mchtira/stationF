@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const mongoUrl = process.env.mongoDb || 'mongodb://anyway:lollillol2@ds115553.mlab.com:15553/stationfreservation'
-const RoomReservation = require('./models/RoomReservation.js')
+const Reservation = require('./models/Reservation.js')
 const Rooms = require('./models/Rooms.js')
 const d = new Date()
 const date = d.toJSON().slice(0, 10)
@@ -18,11 +18,47 @@ connect()
 
 const getAllRooms = () => Rooms.find()
 
-const reservation = async (date) => {
+const newReservation = async (reservation) => new Reservation({ ...reservation }).save()
 
+const getAllReservation = () => Reservation.find()
+
+const getReservationAtDay = (day) => Reservation.find(day) 
+
+//baaaah caca, c'est craaade
+const getFreeRoom = async ({day, startHour, endHour}) => {
+  const wantedStartHour = Number(startHour.split(':')[0])
+  const wantedEndHour = Number(endHour.split(':')[0])
+  const reservations = await getReservationAtDay({ day })
+  const allRooms = await getAllRooms()
+  const unavailableRooms = reservations.filter(reservation => {
+    const reservationStartHour = Number(reservation.startHour.split(':')[0])
+    const reservationEndHour = Number(reservation.endHour.split(':')[0])
+    if (wantedStartHour >= reservationStartHour && wantedStartHour < reservationEndHour)
+      return true
+    if (wantedEndHour >= reservationStartHour && wantedEndHour < reservationEndHour)
+      return true
+    return false
+  })
+
+  console.log(unavailableRooms)
+
+  const availableRooms = allRooms.filter(room => {
+    for(let i = 0; unavailableRooms[i]; i++) {
+      if (unavailableRooms[i].name === room.name)
+        return false
+    }
+    return true
+  })
+
+  return availableRooms
 }
 
+// getFreeRoom({ startHour: '22:00', endHour: '24:00', day: '1193-05-22' })
+
 module.exports = {
-  reservation,
+  newReservation,
   getAllRooms,
+  getAllReservation,
+  getReservationAtDay,
+  getFreeRoom
 }

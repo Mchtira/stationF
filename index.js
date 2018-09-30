@@ -28,14 +28,24 @@ app.post('/rooms', async (req, res) => {
 })
 
 app.post('/availableRooms', async (req, res) => {
-  const date = req.body
-  let rooms = await db.getAllRooms()
-  res.json(rooms)
+  const { startHour, endHour, day } = req.body
+   console.log(req.body)
+  if ([startHour, endHour, day].includes('')) {
+    res.json('Merci de remplir tout les champs')
+  } else {
+    const rooms = await db.getFreeRoom(req.body)
+    res.json(rooms)
+  }
 })
 
-app.post('/reserveRoom', async (req, res) => {
-  let rooms = await db.getAllRooms()
-  res.json(rooms)
+app.post('/reserveRoom', (req, res) => {
+  const { startHour, endHour, day, name } = req.body
+  if ([startHour, endHour, day, name].includes(''))
+    res.json('Merci de remplir tout les champs')
+  else {
+    db.newReservation(req.body)
+    res.json(`La salle ${name} à été reservé le ${day} de ${startHour} à ${endHour}`)
+  }
 })
 
 app.listen(port, () => console.log(`Listen on port ${port}`))
