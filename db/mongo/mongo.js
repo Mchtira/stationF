@@ -40,8 +40,6 @@ const getFreeRoom = async ({day, startHour, endHour}) => {
     return false
   })
 
-  console.log(unavailableRooms)
-
   const availableRooms = allRooms.filter(room => {
     for(let i = 0; unavailableRooms[i]; i++) {
       if (unavailableRooms[i].name === room.name)
@@ -52,8 +50,6 @@ const getFreeRoom = async ({day, startHour, endHour}) => {
 
   return availableRooms
 }
-
-// getFreeRoom({ startHour: '22:00', endHour: '24:00', day: '1193-05-22' })
 
 module.exports = {
   newReservation,

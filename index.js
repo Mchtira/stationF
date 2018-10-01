@@ -14,11 +14,13 @@ app.use(bodyParser.json())
 app.get('/', (req, res) => res.json('Hello World !'))
 
 app.get('/rooms', async (req, res) => {
+  console.log(req.body)
   const rooms = await db.getAllRooms()
   res.json(rooms)
 })
 
 app.post('/rooms', async (req, res) => {
+  console.log(req.body)
   const equipements = req.body.equipements
   const capacity = req.body.capacity
   let rooms = await db.getAllRooms()
@@ -28,8 +30,8 @@ app.post('/rooms', async (req, res) => {
 })
 
 app.post('/availableRooms', async (req, res) => {
+  console.log(req.body)
   const { startHour, endHour, day } = req.body
-   console.log(req.body)
   if ([startHour, endHour, day].includes('')) {
     res.json('Merci de remplir tout les champs')
   } else {
@@ -39,6 +41,7 @@ app.post('/availableRooms', async (req, res) => {
 })
 
 app.post('/reserveRoom', (req, res) => {
+  console.log(req.body)
   const { startHour, endHour, day, name } = req.body
   if ([startHour, endHour, day, name].includes(''))
     res.json('Merci de remplir tout les champs')
