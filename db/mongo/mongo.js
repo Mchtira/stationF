@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const mongoUrl = process.env.mongoDb || 'mongodb://anyway:lollillol2@ds115553.mlab.com:15553/stationfreservation'
+const mongoUrl = process.env.mongoDb
 const Reservation = require('./models/Reservation.js')
 const Rooms = require('./models/Rooms.js')
 const d = new Date()
