@@ -13,41 +13,36 @@ app.use(bodyParser.json())
 
 app.get('/', (req, res) => res.json('Hello World !'))
 
-app.get('/rooms', async (req, res) => {
-  console.log(req.body)
-  const rooms = await db.getAllRooms()
-  res.json(rooms)
-})
-
 app.post('/rooms', async (req, res) => {
-  console.log(req.body)
-  const equipements = req.body.equipements
-  const capacity = req.body.capacity
-  let rooms = await db.getAllRooms()
-  if (equipements) rooms = fn.filterByEquipements(rooms, equipements)
-  if (capacity) rooms = fn.filterByCapacity(rooms, capacity)
-  res.json(rooms)
-})
+  let { equipements, capacity, startHour, endHour, day } = req.body
 
-app.post('/availableRooms', async (req, res) => {
-  console.log(req.body)
-  const { startHour, endHour, day } = req.body
-  if ([startHour, endHour, day].includes('')) {
+  if (startHour, endHour, day && [startHour, endHour, day].includes('')) {
     res.json('Merci de remplir tout les champs')
+  } else if (fn.timeToMinutes(startHour) > fn.timeToMinutes(endHour)) {
+    res.json('La date est invalide')
   } else {
-    const rooms = await db.getFreeRoom(req.body)
-    res.json(rooms)
+    let rooms = await db.getFreeRoom({ startHour, endHour, day })
+    if (equipements) rooms = fn.filterByEquipements(rooms, equipements)
+    if (capacity) rooms = fn.filterByCapacity(rooms, capacity)
+    res.json(rooms[0] ? rooms : 'Aucune salle disponible')
   }
 })
 
-app.post('/reserveRoom', (req, res) => {
-  console.log(req.body)
-  const { startHour, endHour, day, name } = req.body
-  if ([startHour, endHour, day, name].includes(''))
+app.post('/reserveRoom', async (req, res) => {
+  let { startHour, endHour, day, name } = req.body
+
+  if (startHour, endHour, day, name && [startHour, endHour, day, name].includes('')) {
     res.json('Merci de remplir tout les champs')
-  else {
-    db.newReservation(req.body)
-    res.json(`La salle ${name} à été reservé le ${day} de ${startHour} à ${endHour}`)
+  } else if (fn.timeToMinutes(startHour) > fn.timeToMinutes(endHour)) {
+    res.json('La date est invalide')
+  } else {
+    const isFree = await db.isRoomFree(req.body)
+    if (isFree) {
+      db.newReservation(req.body)
+      res.json(`La salle ${name} à été reservé le ${fn.prettyDate(day)} de ${startHour} à ${endHour}`)
+    } else {
+      res.json('Oops, la salle est déjà réservé')
+    }
   }
 })
 
