@@ -6,7 +6,7 @@ const RoomsModel = new mongoose.Schema({
   capacity: Number,
   equipements: Array,
   createdAt: String,
-  updatedAt: String,
+  updatedAt: String
 })
 
 module.exports = mongoose.model('Room', RoomsModel)
